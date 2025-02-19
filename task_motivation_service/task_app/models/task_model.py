@@ -32,18 +32,5 @@ class Task(Base):
     status: Mapped[StatusEnum] = mapped_column(Enum(StatusEnum, name='statusenum', create_type=True),
                                                default=StatusEnum.CREATED)
 
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        default=lambda: datetime.now(timezone.utc)
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.now(),
-        default=lambda: datetime.now(timezone.utc)
-    )
-
     # Связь с моделью Motivation
     motivations: Mapped[list] = relationship("Motivation", back_populates="task")
