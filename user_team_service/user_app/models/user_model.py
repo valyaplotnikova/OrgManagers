@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from ..database.database import Base
+from ..database.database import Base, str_uniq
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
@@ -40,7 +40,7 @@ class User(Base):
 
     first_name: Mapped[str]
     last_name: Mapped[str]
-    email: Mapped[str] = mapped_column(unique=True)
+    email: Mapped[str_uniq]
     password: Mapped[str]
     status: Mapped[StatusEnum] = mapped_column(Enum(StatusEnum, name='statusenum', create_type=True),
                                                default=StatusEnum.USER)
