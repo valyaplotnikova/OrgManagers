@@ -13,27 +13,28 @@ from task_motivation_service.task_app.models.task_model import Task  # import Ta
 
 from task_motivation_service.task_app.database.database import Base
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+# Интерпретируем конфигурационный файл для Python логирования.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+# добавьте объект MetaData вашей модели здесь
+# для поддержки 'autogenerate'
 target_metadata = Base.metadata
+
+# Получаем URL базы данных
 database_url = get_db_url()
-connectable = create_async_engine(database_url, echo=False)
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+
+# Устанавливаем основной параметр конфигурации
 config.set_main_option("sqlalchemy.url", database_url)
+
+# Проверяем, установлен ли database_url корректно
+if not database_url:
+    raise ValueError("Database URL is not set. Please check your configuration.")
+
+# Создаем асинхронный движок
+connectable = create_async_engine(database_url, echo=False)
 
 
 def run_migrations_offline() -> None:
