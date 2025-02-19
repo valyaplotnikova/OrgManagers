@@ -66,26 +66,25 @@ def get_db_url():
     return db_url
 
 
-def get_auth_data():
-    def get_auth_data(log_sensitive=False):
-        """
-        Получает данные аутентификации, включая секретный ключ и алгоритм.
+def get_auth_data(log_sensitive=False):
+    """
+    Получает данные аутентификации, включая секретный ключ и алгоритм.
 
-        :param log_sensitive: Если True, позволяет логировать чувствительные данные.
-                              По умолчанию False для защиты конфиденциальной информации.
-        :return: Словарь с данными аутентификации, содержащий 'secret_key' и 'algorithm'.
-        :rtype: dict
-        """
-        auth_data = {
-            "algorithm": settings.ALGORITHM,
-        }
+    :param log_sensitive: Если True, позволяет логировать чувствительные данные.
+                          По умолчанию False для защиты конфиденциальной информации.
+    :return: Словарь с данными аутентификации, содержащий 'secret_key' и 'algorithm'.
+    :rtype: dict
+    """
+    auth_data = {
+        "algorithm": settings.ALGORITHM,
+    }
 
-        if log_sensitive:
-            # Логируем секретный ключ только в безопасном контексте
-            logger.debug("Доступ к секретному ключу: %s", settings.SECRET_KEY)
-            auth_data["secret_key"] = settings.SECRET_KEY
+    if log_sensitive:
+        # Логируем секретный ключ только в безопасном контексте
+        logger.debug("Доступ к секретному ключу: %s", settings.SECRET_KEY)
+        auth_data["secret_key"] = settings.SECRET_KEY
 
-        return auth_data
+    return auth_data
 
 
 database_url = get_db_url()
