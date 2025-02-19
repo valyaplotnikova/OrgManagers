@@ -1,0 +1,36 @@
+networks:
+  my_network:
+
+services:
+  service1:
+    networks:
+      - my_network
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env
+
+  db1:
+    image: postgres:16-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    expose:
+      - "5432"
+    volumes:
+      - ./pg_data/:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "-c", "pg_isready -U $POSTGRES_USER" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+volumes:
+  pg_data:
