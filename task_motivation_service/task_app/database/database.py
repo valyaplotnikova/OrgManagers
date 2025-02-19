@@ -1,16 +1,22 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated
 from sqlalchemy import func, TIMESTAMP, Integer, inspect
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, declared_attr
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine, AsyncSession
 from task_motivation_service.task_app.core.config import database_url
 
 
-engine = create_async_engine(url=database_url)
-async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-str_uniq = Annotated[str, mapped_column(unique=True, nullable=False)]
+if not database_url:
+    raise ValueError("Переменная окружения 'database_url' не загружена корректно.")
+
+engine = create_async_engine(
+    url=database_url,
+    echo=True,  # Включение логирования SQL-запросов для отладки
+    pool_size=20,  # Установка размера пула соединений
+    max_overflow=10  # Максимальное количество дополнительных соединений
+)
+async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -44,18 +50,20 @@ class Base(AsyncAttrs, DeclarativeBase):
 
             # Преобразование специальных типов данных
             if isinstance(value, datetime):
-                value = value.isoformat()
+                value = value.astimezone().isoformat()
             elif isinstance(value, Decimal):
-                value = float(value)
+                value = round(float(value), 2)
             elif isinstance(value, uuid.UUID):
                 value = str(value)
 
             # Добавляем значение в результат
-            if not exclude_none or value is not None:
-                result[column.key] = value
+            if exclude_none and value is None:
+                continue
+            result[column.key] = value
 
         return result
 
     def __repr__(self) -> str:
         """Строковое представление объекта для удобства отладки."""
-        return f"<{self.__class__.__name__}(id={self.id}, created_at={self.created_at}, updated_at={self.updated_at})>"
+        return (f"<{self.__class__.__name__}(id={self.id if self.id else 'unsaved'}, "
+                f"created_at={self.created_at}, updated_at={self.updated_at})>")
