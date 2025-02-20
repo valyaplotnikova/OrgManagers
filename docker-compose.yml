@@ -1,0 +1,99 @@
+networks:
+  my_network:
+
+services:
+  service1:
+    build:
+      context: ./user_team_service
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    command: bash -c "alembic -c /app/user_team_service/alembic.ini upgrade head;uvicorn user_team_service.user_app.main:app --host 0.0.0.0 --port 8001 --reload"
+    depends_on:
+      db1:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./user_team_service/.env
+    networks:
+      - my_network
+
+  service2:
+    build:
+      context: ./task_motivation_service
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    command: bash -c "alembic -c /app/task_motivation_service/alembic.ini upgrade head;uvicorn task_motivation_service.task_app.main:app --host 0.0.0.0 --port 8002 --reload"
+
+    depends_on:
+      db2:
+        condition: service_healthy
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./task_motivation_service/.env
+    networks:
+      - my_network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - service1
+      - service2
+    networks:
+      - my_network
+
+  db1:
+    image: postgres:16-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB1}
+    expose:
+      - "5432"
+    volumes:
+      - ./pg_data1/:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "-c", "pg_isready -U $POSTGRES_USER" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+    networks:
+      - my_network
+
+
+  db2:
+    image: postgres:16-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB2}
+    expose:
+      - "5432"
+    volumes:
+      - ./pg_data2/:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "-c", "pg_isready -U $POSTGRES_USER" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+    networks:
+      - my_network
+
+volumes:
+  pg_data1:
+  pg_data2:

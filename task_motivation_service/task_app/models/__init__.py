@@ -1,0 +1,4 @@
+from task_motivation_service.task_app.database.database import Base
+from task_motivation_service.task_app.models.task_model import Task
+from task_motivation_service.task_app.models.meeteng_model import Meeting
+from task_motivation_service.task_app.models.motivation_model import Motivation

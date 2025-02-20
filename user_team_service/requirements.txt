@@ -1,0 +1,16 @@
+alembic
+asyncpg
+fastapi
+uvicorn
+sqladmin
+sqlalchemy
+databases
+bcrypt==4.0.1
+loguru
+passlib[bcrypt]
+pydantic-settings
+pydantic[email]
+python-jose[cryptography]
+pytest-asyncio
+pytest
+httpx
