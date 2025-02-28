@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import pytest
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +13,8 @@ from task_motivation_service.task_app.schemas.meeting_schema import SMeetingCrea
 async def test_create_meeting(async_session: AsyncSession, mocked_authenticated_client):
     service = MeetingService(session=async_session)
     meeting_data = SMeetingCreate(organisation_by=1,
-                                  start_at="2025-10-31T17:00:00",
-                                  end_at="2025-10-31T17:30:00")
+                                  start_at=datetime.fromisoformat("2025-10-31T17:00:00").replace(tzinfo=timezone.utc),
+                                  end_at=datetime.fromisoformat("2025-10-31T17:30:00").replace(tzinfo=timezone.utc))
 
     await service.create_meeting(meeting_data)
 
@@ -26,12 +28,12 @@ async def test_create_meeting(async_session: AsyncSession, mocked_authenticated_
 async def test_update_meeting(async_session: AsyncSession, mocked_authenticated_client):
     service = MeetingService(session=async_session)
     meeting_data = SMeetingCreate(organisation_by=1,
-                                  start_at="2025-10-31T17:00:00",
-                                  end_at="2025-10-31T17:30:00")
+                                  start_at=datetime.fromisoformat("2025-10-31T17:00:00").replace(tzinfo=timezone.utc),
+                                  end_at=datetime.fromisoformat("2025-10-31T17:30:00").replace(tzinfo=timezone.utc))
     await service.create_meeting(meeting_data)
 
-    update_data = SMeetingUpdate(start_at="2025-11-30T17:00:00",
-                                 end_at="2025-11-30T17:30:00")
+    update_data = SMeetingUpdate(start_at=datetime.fromisoformat("2025-11-30T17:00:00").replace(tzinfo=timezone.utc),
+                                 end_at=datetime.fromisoformat("2025-11-30T17:30:00").replace(tzinfo=timezone.utc))
     await service.update_meeting(2, update_data)
 
     updated_meeting = await service.get_meeting_by_id(2)
@@ -46,8 +48,8 @@ async def test_update_meeting(async_session: AsyncSession, mocked_authenticated_
 async def test_delete_meeting(async_session: AsyncSession, mocked_authenticated_client):
     service = MeetingService(session=async_session)
     meeting_data = SMeetingCreate(organisation_by=1,
-                                  start_at="2025-10-31T17:00:00",
-                                  end_at="2025-10-31T17:30:00")
+                                  start_at=datetime.fromisoformat("2025-10-31T17:00:00").replace(tzinfo=timezone.utc),
+                                  end_at=datetime.fromisoformat("2025-10-31T17:30:00").replace(tzinfo=timezone.utc))
     await service.create_meeting(meeting_data)
 
     await service.delete_meeting(3)
@@ -60,11 +62,11 @@ async def test_delete_meeting(async_session: AsyncSession, mocked_authenticated_
 async def test_get_all_meetings(async_session: AsyncSession, mocked_authenticated_client):
     service = MeetingService(session=async_session)
     meeting1 = SMeetingCreate(organisation_by=1,
-                              start_at="2025-10-31T17:00:00",
-                              end_at="2025-10-31T17:30:00")
+                              start_at=datetime.fromisoformat("2025-10-31T17:00:00").replace(tzinfo=timezone.utc),
+                              end_at=datetime.fromisoformat("2025-10-31T17:30:00").replace(tzinfo=timezone.utc))
     meeting2 = SMeetingCreate(organisation_by=1,
-                              start_at="2025-08-31T17:00:00",
-                              end_at="2025-08-31T17:30:00")
+                              start_at=datetime.fromisoformat("2025-08-31T17:00:00").replace(tzinfo=timezone.utc),
+                              end_at=datetime.fromisoformat("2025-08-31T17:30:00").replace(tzinfo=timezone.utc))
 
     await service.create_meeting(meeting1)
     await service.create_meeting(meeting2)
@@ -78,8 +80,8 @@ async def test_create_participant(async_session: AsyncSession, mocked_authentica
     service = ParticipantService(session=async_session)
     meet_service = MeetingService(session=async_session)
     meeting_data = SMeetingCreate(organisation_by=1,
-                                  start_at="2025-10-31T17:00:01",
-                                  end_at="2025-10-31T17:30:01")
+                                  start_at=datetime.fromisoformat("2025-10-31T17:00:00").replace(tzinfo=timezone.utc),
+                                  end_at=datetime.fromisoformat("2025-10-31T17:30:00").replace(tzinfo=timezone.utc))
     await meet_service.create_meeting(meeting_data)
     await meet_service.get_meeting_by_id(6)
     participant_data = SParticipant(user_id=1)  # Убираем meeting_id
